@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tsinjo STD23036</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .header { text-align: center; margin-bottom: 30px; color: #2c3e50; }
+        .donation-form { background: #ecf0f1; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input { width: 100%; padding: 8px; border: 1px solid #bdc3c7; border-radius: 4px; }
+        .btn { background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn:hover { background: #2980b9; }
+        .transactions { margin-top: 30px; }
+        .transaction { background: white; border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+        .donation { border-left: 4px solid #27ae60; }
+        .help { border-left: 4px solid #e74c3c; }
+        .status { font-weight: bold; padding: 2px 8px; border-radius: 3px; }
+        .status.SUCCEEDED { background: #d5edda; color: #155724; }
+        .status.FAILED { background: #f8d7da; color: #721c24; }
+        .status.VERIFYING { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Tsinjo - Fonds d'urgence HEI</h1>
+        <p>Transparence et solidarité pour tous</p>
+    </div>
+
+    <div class="donation-form">
+        <h2>Faire un don</h2>
+        <form th:action="@{/donations}" method="post">
+            <div class="form-group">
+                <label for="donorEmail">Email du donateur:</label>
+                <input type="email" id="donorEmail" name="donorEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="donorName">Nom complet du donateur:</label>
+                <input type="text" id="donorName" name="donorName" required>
+            </div>
+            <div class="form-group">
+                <label for="paymentId">ID du paiement:</label>
+                <input type="text" id="paymentId" name="paymentId" required>
+            </div>
+            <button type="submit" class="btn">Soumettre le don</button>
+        </form>
+    </div>
+
+    <div class="transactions">
+        <h2>Historique des transactions</h2>
+        <div th:if="${#lists.isEmpty(transactions)}">
+            <p>Aucune transaction pour le moment.</p>
+        </div>
+
+        <div th:each="transaction : ${transactions}">
+            <!-- Don -->
+            <div th:if="${transaction.class.simpleName == 'Donation'}" class="transaction donation">
+                <h3>💚 DON</h3>
+                <p><strong>Donateur:</strong> <span th:text="${transaction.donor.fullName}"></span>
+                    (<span th:text="${transaction.donor.email}"></span>)</p>
+                <p><strong>Montant:</strong> <span th:text="${transaction.payment.amount}"></span> €</p>
+                <p><strong>Date:</strong> <span th:text="${#temporals.format(transaction.creationDatetime, 'dd/MM/yyyy HH:mm')}"></span></p>
+                <p><strong>Moyen de paiement:</strong> <span th:text="${transaction.payment.paymentMethod}"></span></p>
+                <p><strong>Statut:</strong>
+                    <span class="status" th:classappend="${transaction.payment.status.name()}"
+                          th:text="${transaction.payment.status.name()}"></span></p>
+            </div>
+
+            <!-- Aide -->
+            <div th:if="${transaction.class.simpleName == 'Help'}" class="transaction help">
+                <h3>❤️ AIDE</h3>
+                <p><strong>Bénéficiaire:</strong> <span th:text="${transaction.beneficiary.fullName}"></span>
+                    (<span th:text="${transaction.beneficiary.email}"></span>)</p>
+                <p><strong>Montant:</strong> <span th:text="${transaction.payment.amount}"></span> €</p>
+                <p><strong>Date:</strong> <span th:text="${#temporals.format(transaction.creationDatetime, 'dd/MM/yyyy HH:mm')}"></span></p>
+                <p><strong>Description de l'accident:</strong> <span th:text="${transaction.accidentDescription}"></span></p>
+                <p><strong>Moyen de paiement:</strong> <span th:text="${transaction.payment.paymentMethod}"></span></p>
+                <p><strong>Statut:</strong>
+                    <span class="status" th:classappend="${transaction.payment.status.name()}"
+                          th:text="${transaction.payment.status.name()}"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
